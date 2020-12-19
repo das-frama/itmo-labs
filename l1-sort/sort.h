@@ -5,6 +5,8 @@
 #ifndef ITMO_LABS_SORT_H
 #define ITMO_LABS_SORT_H
 
+#define INSERTION_SORT_SHOULD_USE 5
+
 // Simple swap.
 template<typename T>
 void swap(T* a, T* b) {
@@ -13,6 +15,7 @@ void swap(T* a, T* b) {
     *b = temp;
 }
 
+// Insertion sort.
 template<typename T, typename Compare>
 void insertion_sort(T* first, T* last, Compare comp) {
     T key;
@@ -35,31 +38,44 @@ void sort3(T* a, T* b, T* c, Compare comp) {
     if (comp(*c, *b)) swap(b, c);
 }
 
+// Partition.
+template<typename T, typename Compare>
+T* partition(T* first, T* last, const T p, Compare comp) {
+    auto i = first, j = last;
+
+    while (true) {
+        while(comp(*i, p)) i += 1;
+        while(comp(p, *j)) j -= 1;
+        if (i >= j) {
+            return j;
+        }
+        swap(i, j);
+        i += 1;
+        j -= 1;
+    }
+}
+
 // Quicksort with some optimisations.
 template<typename T, typename Compare>
 void sort(T* first, T* last, Compare comp) {
     if (first >= last) {
         return;
     }
-
-    T* i = first;
-    T* j = last;
-    T* p = first + (last - first) / 2;
-
-    sort3(i, j, p, comp);
-
-    while (i < j) {
-        while (comp(*i, *p) && i < last) i += 1;
-        while (comp(*p, *j) && !comp(*j, *p)) j -= 1;
-        if (i < j) {
-            swap(i, j);
-        }
+    // Decide if we should use insertion sort.
+    int n = last - first;
+    if (n <= INSERTION_SORT_SHOULD_USE) {
+        return insertion_sort(first, last, comp);
     }
 
-    swap(p, j);
+    // Sort between first, middle and last (median).
+    auto i = first, j = last,
+         p = first + (last - first) / 2;
+    sort3(i, p, j, comp);
 
-    sort(first, j - 1, comp);
-    sort(j + 1, last, comp);
+    // Sort.
+    p = partition(first, last, *p, comp);
+    sort(first, p, comp);
+    sort(p+1, last, comp);
 }
 
 #endif //ITMO_LABS_SORT_H
