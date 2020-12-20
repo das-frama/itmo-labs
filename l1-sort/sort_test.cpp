@@ -3,12 +3,16 @@
 //
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
+#include <windows.h>
 #include "gtest/gtest.h"
 #include "sort.h"
 
 #define COMP_LESS  [](int a, int b) { return a < b; }
 #define COMP_GREAT [](int a, int b) { return a > b; }
+
+#define N_PERFORMANCE 150
 
 template<typename T>
 void test_array_eq(T *a, T *b, int n) {
@@ -65,6 +69,7 @@ TEST(test_sort, test_two) {
 TEST(test_sort, test_six) {
     int a[] = {15, 4, 42, 23, 8, 16};
     sort(a, a + 5, COMP_LESS);
+    print_array(a, 6);
     test_array_sorted(a, a + 5, COMP_LESS);
 }
 
@@ -72,14 +77,29 @@ TEST(test_sort, test_six) {
 TEST(test_sort, test_duplicates) {
     int a[] = {16, 1, 1, 2, 8, 4, 4, 8, 2, 16};
     sort(a, a + 9, COMP_LESS);
+    print_array(a, 10);
     test_array_sorted(a, a + 9, COMP_LESS);
 }
 
 // All duplicates elements.
 TEST(test_sort, test_all_duplicates) {
-    int a[] = { 5, 5, 5, 5, 7, 5 };
+    int a[] = {5, 5, 5, 5, 7, 5};
     sort(a, a + 5, COMP_LESS);
     test_array_sorted(a, a + 5, COMP_LESS);
+}
+
+// Test reverse case.
+TEST(test_sort, test_worst) {
+    int a[] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    sort(a, a + 9, COMP_LESS);
+    test_array_sorted(a, a + 9, COMP_LESS);
+}
+
+// Test none case.
+TEST(test_sort, test_none) {
+    int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    sort(a, a + 9, COMP_LESS);
+    test_array_sorted(a, a + 9, COMP_LESS);
 }
 
 // Big elements.
@@ -92,8 +112,8 @@ TEST(test_sort, test_big) {
         a[i] = rand() % n;
     }
 
-    sort(a, a + n - 1, [](int a, int b) { return a < b; });
-    test_array_sorted(a, a + n - 1, [](int a, int b) { return a < b; });
+    sort(a, a + n - 1, COMP_LESS);
+    test_array_sorted(a, a + n - 1, COMP_LESS);
 
     delete[] a;
 }
@@ -112,4 +132,47 @@ TEST(test_sort, test_class) {
     test_array_sorted(a, a + n - 1, [](const Beatle &a, const Beatle &b) { return a.size < b.size; });
 
     delete[] a;
+}
+
+// Performance test.
+TEST(test_performance, test_qsort) {
+    int *a = new int[N_PERFORMANCE];
+    srand(time(NULL));
+    for (int i = 0; i < N_PERFORMANCE; i += 1) {
+        a[i] = rand() % N_PERFORMANCE;
+    }
+
+    // Init.
+    LARGE_INTEGER StartingTime, EndingTime, ElapsedMicroseconds;
+    LARGE_INTEGER Frequency;
+    QueryPerformanceFrequency(&Frequency);
+    QueryPerformanceCounter(&StartingTime);
+    // Sort.
+    sort(a, a + N_PERFORMANCE - 1, COMP_LESS);
+    // Result.
+    QueryPerformanceCounter(&EndingTime);
+    ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
+    printf("Time taken by qsort %d", ElapsedMicroseconds);
+}
+
+// Performance test.
+TEST(test_performance, test_isort) {
+    int *a = new int[N_PERFORMANCE];
+    srand(time(NULL));
+    for (int i = 0; i < N_PERFORMANCE; i += 1) {
+        a[i] = rand() % N_PERFORMANCE;
+    }
+
+    // Init.
+    LARGE_INTEGER StartingTime, EndingTime, ElapsedMicroseconds;
+    LARGE_INTEGER Frequency;
+    QueryPerformanceFrequency(&Frequency);
+    QueryPerformanceCounter(&StartingTime);
+    // Sort.
+    auto begin = clock();
+    insertion_sort(a, a + N_PERFORMANCE - 1, COMP_LESS);
+    // Result.
+    QueryPerformanceCounter(&EndingTime);
+    ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
+    printf("Time taken by isort %d", ElapsedMicroseconds);
 }
