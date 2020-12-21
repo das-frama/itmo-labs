@@ -77,7 +77,6 @@ void sort(T *first, T *last, Compare comp) {
             sort(p + 1, last, comp);
             last = p;
         }
-
     }
 }
 

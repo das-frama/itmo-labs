@@ -2,15 +2,15 @@
 // Created by Andrey Galaktionov on 19.12.2020.
 //
 
-#include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
 #include <windows.h>
 #include "gtest/gtest.h"
 #include "sort.h"
 
-#define COMP_LESS  [](int a, int b) { return a < b; }
-#define COMP_GREAT [](int a, int b) { return a > b; }
+#define COMPARE_LESS [](int a, int b) { return a < b; }
+#define COMPARE_LESS_FLOAT [](float a, float b) { return a < b; }
+#define COMPARE_LESS_CHAR [](char a, char b) { return a < b; }
+#define COMPARE_GREAT [](int a, int b) { return a > b; }
 
 #define N_PERFORMANCE 150
 
@@ -43,16 +43,16 @@ struct Beatle {
 // Empty array.
 TEST(test_sort, test_empty) {
     int a[10] = {};
-    sort(a, a, COMP_LESS);
+    sort(a, a, COMPARE_LESS);
 
-    test_array_sorted(a, a + 10, COMP_LESS);
+    test_array_sorted(a, a + 10, COMPARE_LESS);
 }
 
 // One element.
 TEST(test_sort, test_one) {
     int a[] = {1};
-    sort(a, a, COMP_LESS);
-    test_array_sorted(a, a + 1, COMP_LESS);
+    sort(a, a, COMPARE_LESS);
+    test_array_sorted(a, a + 1, COMPARE_LESS);
 
     int b[] = {1};
     test_array_eq(a, b, 1);
@@ -61,46 +61,67 @@ TEST(test_sort, test_one) {
 // Two elements.
 TEST(test_sort, test_two) {
     int a[] = {42, 10};
-    sort(a, a + 1, COMP_LESS);
-    test_array_sorted(a, a + 2, COMP_LESS);
+    sort(a, a + 1, COMPARE_LESS);
+    test_array_sorted(a, a + 2, COMPARE_LESS);
 }
 
 // Six elements.
 TEST(test_sort, test_six) {
     int a[] = {15, 4, 42, 23, 8, 16};
-    sort(a, a + 5, COMP_LESS);
-    print_array(a, 6);
-    test_array_sorted(a, a + 5, COMP_LESS);
+    sort(a, a + 5, COMPARE_LESS);
+    test_array_sorted(a, a + 5, COMPARE_LESS);
 }
 
 // Duplicates elements.
 TEST(test_sort, test_duplicates) {
     int a[] = {16, 1, 1, 2, 8, 4, 4, 8, 2, 16};
-    sort(a, a + 9, COMP_LESS);
+    sort(a, a + 9, COMPARE_LESS);
+    test_array_sorted(a, a + 9, COMPARE_LESS);
     print_array(a, 10);
-    test_array_sorted(a, a + 9, COMP_LESS);
 }
 
 // All duplicates elements.
 TEST(test_sort, test_all_duplicates) {
-    int a[] = {5, 5, 5, 5, 7, 5};
-    sort(a, a + 5, COMP_LESS);
-    test_array_sorted(a, a + 5, COMP_LESS);
+    int a[] = {5, 5, 5, 5, 5, 5};
+    sort(a, a + 5, COMPARE_LESS);
+    test_array_sorted(a, a + 5, COMPARE_LESS);
 }
 
 // Test reverse case.
 TEST(test_sort, test_worst) {
     int a[] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
-    sort(a, a + 9, COMP_LESS);
-    test_array_sorted(a, a + 9, COMP_LESS);
+    sort(a, a + 9, COMPARE_LESS);
+    test_array_sorted(a, a + 9, COMPARE_LESS);
+}
+
+// Test reverse case great.
+TEST(test_sort, test_great) {
+    int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    sort(a, a + 9, COMPARE_GREAT);
+    test_array_sorted(a, a + 9, COMPARE_GREAT);
 }
 
 // Test none case.
 TEST(test_sort, test_none) {
     int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    sort(a, a + 9, COMP_LESS);
-    test_array_sorted(a, a + 9, COMP_LESS);
+    sort(a, a + 9, COMPARE_LESS);
+    test_array_sorted(a, a + 9, COMPARE_LESS);
 }
+
+// Test floats.
+TEST(test_sort, test_floats) {
+    float a[] = {5.0, 4.0, 2.0, 4.0, 10.0, 1.0, 6.0, 9.0, 12.0, 8.0};
+    sort(a, a + 9, COMPARE_LESS_FLOAT);
+    test_array_sorted(a, a + 9, COMPARE_LESS_FLOAT);
+}
+
+// Test chars.
+TEST(test_sort, test_chars) {
+    float a[] = {'b', 'z', 'f', 'e', 'o', 'h', 'p', 'a', 'c', 'g'};
+    sort(a, a + 9, COMPARE_LESS_CHAR);
+    test_array_sorted(a, a + 9, COMPARE_LESS_CHAR);
+}
+
 
 // Big elements.
 TEST(test_sort, test_big) {
@@ -112,8 +133,8 @@ TEST(test_sort, test_big) {
         a[i] = rand() % n;
     }
 
-    sort(a, a + n - 1, COMP_LESS);
-    test_array_sorted(a, a + n - 1, COMP_LESS);
+    sort(a, a + n - 1, COMPARE_LESS);
+    test_array_sorted(a, a + n - 1, COMPARE_LESS);
 
     delete[] a;
 }
@@ -148,7 +169,7 @@ TEST(test_performance, test_qsort) {
     QueryPerformanceFrequency(&Frequency);
     QueryPerformanceCounter(&StartingTime);
     // Sort.
-    sort(a, a + N_PERFORMANCE - 1, COMP_LESS);
+    sort(a, a + N_PERFORMANCE - 1, COMPARE_LESS);
     // Result.
     QueryPerformanceCounter(&EndingTime);
     ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
@@ -170,7 +191,7 @@ TEST(test_performance, test_isort) {
     QueryPerformanceCounter(&StartingTime);
     // Sort.
     auto begin = clock();
-    insertion_sort(a, a + N_PERFORMANCE - 1, COMP_LESS);
+    insertion_sort(a, a + N_PERFORMANCE - 1, COMPARE_LESS);
     // Result.
     QueryPerformanceCounter(&EndingTime);
     ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
