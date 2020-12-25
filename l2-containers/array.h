@@ -14,12 +14,13 @@ class Array final {
 public:
     Array() : Array(8) {}
 
-    Array(int capacity) {
+    explicit Array(int capacity) {
         assert(capacity >= 0 && capacity <= INT_MAX);
 
         reallocate_memory(capacity);
     }
 
+    // Copy constructor.
     Array(const Array<T> &other) {
         reallocate_memory(other._capacity);
 
@@ -29,6 +30,7 @@ public:
         }
     }
 
+    // Destructor.
     ~Array() {
         clear();
         free(_data); // may be we should switch to ::operator delete()
@@ -42,6 +44,7 @@ public:
         insert(_size, std::move(value));
     }
 
+    // Insert at position with copy.
     void insert(int index, const T &value) {
         _size += 1;
 
@@ -55,6 +58,7 @@ public:
         _data[index] = value;
     }
 
+    // Insert at position with move.
     void insert(int index, T &&value) {
         _size += 1;
 
@@ -68,6 +72,7 @@ public:
         _data[index] = std::move(value);
     }
 
+    // Remove element at index.
     void remove(int index) {
         assert(index >= 0 && index < _size);
 
@@ -80,6 +85,7 @@ public:
         }
     }
 
+    // Clear all array.
     void clear() {
         for (size_t i = 0; i < _size; i += 1) {
             _data[i].~T();
@@ -87,27 +93,34 @@ public:
         _size = 0;
     }
 
-    // Get position.
+    // Get element at index.
     const T &operator[](size_t index) const {
         assert(index < _size);
 
         return _data[index];
     };
 
+    // Get element at index.
     T &operator[](int index) {
         assert(index < _size);
 
         return _data[index];
     }
 
+    // Actual size of array.
     size_t size() const {
         return _size;
     }
 
 private:
+    // Reallocate new memory with given capacity.
     void reallocate_memory(int new_capacity) {
         // New block of memory.
         T *temp_data = (T *) malloc(new_capacity * sizeof(T)); // may be we should switch to ::operator new()
+        if (temp_data == nullptr) {
+            std::cerr << "Unable to allocate memory. Exiting..." << std::endl;
+            exit(-1);
+        }
 
         // Decrease size if new capacity is lower than current size.
         if (new_capacity < _size) {
@@ -141,9 +154,9 @@ private:
         friend Array;
 
     public:
-        Iterator(Array<T> &array) : _array(array) {}
+        explicit Iterator(Array<T> &array) : _array(array) {}
 
-        Iterator(Array<T> &&array) noexcept: _array(array) {}
+        explicit Iterator(Array<T> &&array) noexcept: _array(array) {}
 
         const T &get() const {
             return _array[_index];
@@ -155,9 +168,10 @@ private:
 
         void insert(const T &value) {
             _array.insert(_index, value);
-//            if (_array.size() > 0) {
-//                _index += 1;
-//            }
+        }
+
+        void insert(T &&value) {
+            _array.insert(_index, std::move(value));
         }
 
         void remove() {
