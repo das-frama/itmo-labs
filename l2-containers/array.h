@@ -12,7 +12,7 @@
 template<typename T>
 class Array final {
 public:
-    Array() : Array(2) {}
+    Array() : Array(8) {}
 
     explicit Array(int capacity) {
         assert(capacity >= 0 && capacity <= INT_MAX);

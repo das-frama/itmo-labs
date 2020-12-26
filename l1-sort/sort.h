@@ -59,10 +59,10 @@ template<typename T, typename Compare>
 void sort(T *first, T *last, Compare comp) {
     while (first < last) {
         // Decide if we should use insertion sort.
-//        int n = last - first;
-//        if (n <= INSERTION_SORT_SHOULD_USE) {
-//            return insertion_sort(first, last, comp);
-//        }
+        int n = last - first;
+        if (n <= INSERTION_SORT_SHOULD_USE) {
+            return insertion_sort(first, last, comp);
+        }
 
         // Sort between first, middle and last (median).
         auto p = first + (last - first) / 2;
