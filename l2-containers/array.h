@@ -12,7 +12,7 @@
 template<typename T>
 class Array final {
 public:
-    Array() : Array(8) {}
+    Array() : Array(2) {}
 
     explicit Array(int capacity) {
         assert(capacity >= 0 && capacity <= INT_MAX);
@@ -122,14 +122,14 @@ private:
             exit(-1);
         }
 
-        // Decrease size if new capacity is lower than current size.
+        // Decrease size if new capacity is lower than current size. Maybe sometimes in the nearest future...
         if (new_capacity < _size) {
             _size = new_capacity;
         }
 
         // Move every item.
         for (size_t i = 0; i < _size; i += 1) {
-            temp_data[i] = std::move(_data[i]); // we are not using memcpy due to class problems.
+            temp_data[i] = std::move(_data[i]);
         }
 
         // Call destructor of every item.

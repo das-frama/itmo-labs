@@ -12,7 +12,7 @@
 #define COMPARE_LESS_CHAR [](char a, char b) { return a < b; }
 #define COMPARE_GREAT [](int a, int b) { return a > b; }
 
-#define N_PERFORMANCE 150
+#define N_PERFORMANCE 10
 
 template<typename T>
 void test_array_eq(T *a, T *b, int n) {
@@ -35,10 +35,6 @@ void print_array(T *first, int n) {
     }
     printf("\n");
 }
-
-struct Beatle {
-    int size;
-};
 
 // Empty array.
 TEST(test_sort, test_empty) {
@@ -125,7 +121,7 @@ TEST(test_sort, test_chars) {
 
 // Big elements.
 TEST(test_sort, test_big) {
-    int n = 10000;
+    int n = 20000000;
     int *a = new int[n];
 
     srand(time(NULL));
@@ -141,18 +137,22 @@ TEST(test_sort, test_big) {
 
 // Class test.
 TEST(test_sort, test_class) {
-    int n = 50; // 50 жуков.
-    auto *a = new Beatle[n];
+    struct Beetle {
+        int size;
+    };
+
+    const int N = 500; // 500 жуков.
+    auto beetles = new Beetle[N];
 
     srand(time(NULL));
-    for (int i = 0; i < n; i += 1) {
-        a[i].size = rand() % 255 + 50;
+    for (int i = 0; i < N; i += 1) {
+        beetles[i].size = rand() % 255 + 50;
     }
 
-    sort(a, a + n - 1, [](const Beatle &a, const Beatle &b) { return a.size < b.size; });
-    test_array_sorted(a, a + n - 1, [](const Beatle &a, const Beatle &b) { return a.size < b.size; });
+    sort(beetles, beetles + N - 1, [](const Beetle &a, const Beetle &b) { return a.size < b.size; });
+    test_array_sorted(beetles, beetles + N - 1, [](const Beetle &a, const Beetle &b) { return a.size < b.size; });
 
-    delete[] a;
+    delete[] beetles;
 }
 
 // Performance test.
@@ -190,7 +190,6 @@ TEST(test_performance, test_isort) {
     QueryPerformanceFrequency(&Frequency);
     QueryPerformanceCounter(&StartingTime);
     // Sort.
-    auto begin = clock();
     insertion_sort(a, a + N_PERFORMANCE - 1, COMPARE_LESS);
     // Result.
     QueryPerformanceCounter(&EndingTime);
