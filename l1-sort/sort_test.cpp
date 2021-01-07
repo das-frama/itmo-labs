@@ -12,7 +12,7 @@
 #define COMPARE_LESS_CHAR [](char a, char b) { return a < b; }
 #define COMPARE_GREAT [](int a, int b) { return a > b; }
 
-#define N_PERFORMANCE 10
+#define N_PERFORMANCE 200000000
 
 template<typename T>
 void test_array_eq(T *a, T *b, int n) {
@@ -121,7 +121,7 @@ TEST(test_sort, test_chars) {
 
 // Big elements.
 TEST(test_sort, test_big) {
-    int n = 20000000;
+    int n = 200000000;
     int *a = new int[n];
 
     srand(time(NULL));
